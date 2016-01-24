@@ -1,4 +1,81 @@
 
+
+
+
+package main
+ 
+import (
+    "fmt"
+    "net"
+    "time"
+    "strconv"
+)
+ 
+func CheckError(err error) {
+    if err  != nil {
+        fmt.Println("Error: " , err)
+    }
+}
+ 
+ const port="30000"
+ const localIP="129.241.187.143"
+
+
+func client() {
+    ServerAddr,err := net.ResolveUDPAddr("udp",net.JoinHostPort( localIP, port ))
+    CheckError(err)
+ 
+    LocalAddr, err := net.ResolveUDPAddr("udp", net.JoinHostPort( localIP, port ))
+    CheckError(err)
+ 
+    Conn, err := net.DialUDP("udp", LocalAddr, ServerAddr)
+    CheckError(err)
+ 
+    defer Conn.Close()
+    i := 0
+    for {
+        msg := strconv.Itoa(i)
+        i++
+        buf := []byte(msg)
+        _,err := Conn.Write(buf)
+        if err != nil {
+            fmt.Println(msg, err)
+        }
+        time.Sleep(time.Second * 1)
+    }
+}
+
+ 
+ 
+func server() {
+    /* Lets prepare a address at any address at port 10001*/   
+    ServerAddr,err := net.ResolveUDPAddr("udp",":10001")
+    CheckError(err)
+ 
+    /* Now listen at selected port */
+    ServerConn, err := net.ListenUDP("udp", ServerAddr)
+    CheckError(err)
+    defer ServerConn.Close()
+ 
+    buf := make([]byte, 1024)
+ 
+    for {
+        n,addr,err := ServerConn.ReadFromUDP(buf)
+        fmt.Println("Received ",string(buf[0:n]), " from ",addr)
+ 
+        if err != nil {
+            fmt.Println("Error: ",err)
+        } 
+    }
+}
+
+func main(){
+    go server();
+    go client();
+}
+
+
+/*
 package main
 
 import (
@@ -11,17 +88,19 @@ import (
 ) 
 
 const bcast = "129.241.187.143"
-const udpPort = "30000" // workplace 
+const udpPort = "30005" // workplace 
 //heyhey
 
 // #### UDP CONNECTOR
 
 func ConUDP( port string ) {
     // open sending side
-    raddr, err := net.ResolveUDPAddr( "udp", udpPort)//net.JoinHostPort( bcast, port ) )
+
+    raddr, err := net.ResolveUDPAddr( "udp", net.JoinHostPort( bcast, port ) )
     if err != nil {
         fmt.Fprintln( os.Stderr, "Failed to resolve addr for " + bcast + ":" + port );
     }
+    
     send, err := net.DialUDP( "udp", nil, raddr )
     if err != nil {
         fmt.Fprintln(os.Stderr, "UDP send connection error on " + raddr.String() )
@@ -29,7 +108,16 @@ func ConUDP( port string ) {
         return
     }
     defer send.Close()
-    sendingFrom := send.LocalAddr()
+
+    buf:=[]byte("hello")
+    n,err:=send.Write(buf)
+    if err != nil{
+
+    }
+
+    fmt.Println("client: wrote:",string(buf[0:n]))
+
+    //sendingFrom := send.LocalAddr()
     //fmt.Fprintln(sendingFrom," ")
 
     // open listening side
@@ -37,6 +125,7 @@ func ConUDP( port string ) {
     if err != nil {
         fmt.Fprintln( os.Stderr, "Failed to resolve addr for :" + port );
     }
+    
     rcv, err := net.ListenUDP( "udp", laddr )
     if err != nil {
         fmt.Fprintln(os.Stderr, "UDP recv connection error on " + laddr.String() )
@@ -45,6 +134,9 @@ func ConUDP( port string ) {
     }
     defer rcv.Close()
 
+    fmt.Println("listening on", rcv.LocalAddr().String())
+
+    /*
     // synchronization
     var start sync.WaitGroup
     var end sync.WaitGroup
@@ -69,7 +161,9 @@ func ConUDP( port string ) {
     fmt.Fprintf( send, "<<terminate>>" )
     end.Wait()
     fmt.Fprintln( os.Stderr, " terminated" )
+
 }
+
 
 func udpListener( conn *net.UDPConn, sendingFrom net.Addr, start *sync.WaitGroup, end *sync.WaitGroup ) {
     fmt.Fprintln( os.Stderr, "Started listener..." )
@@ -101,3 +195,4 @@ func udpListener( conn *net.UDPConn, sendingFrom net.Addr, start *sync.WaitGroup
 func main() {
     ConUDP( udpPort )
 }
+*/
