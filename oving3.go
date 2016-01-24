@@ -10,9 +10,9 @@ import (
     "strings"
 ) 
 
-const bcast = "129.241.187.145"
+const bcast = "129.241.187.143"
 const udpPort = "30000" // workplace 
-
+//heyhey
 
 // #### UDP CONNECTOR
 
@@ -30,7 +30,7 @@ func ConUDP( port string ) {
     }
     defer send.Close()
     sendingFrom := send.LocalAddr()
-    fmt.Fprintln(sendingFrom," ")
+    //fmt.Fprintln(sendingFrom," ")
 
     // open listening side
     laddr, err := net.ResolveUDPAddr( "udp", net.JoinHostPort( "", port ) )
