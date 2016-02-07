@@ -1,2 +1,1 @@
-# Sanntid
-sann tid
+# Heismappe
